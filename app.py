@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
@@ -17,13 +17,15 @@ import concurrent.futures
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, 
+    static_url_path='',
+    static_folder='static',
+    template_folder='templates'
+)
+
 CORS(app, resources={
     r"/*": {
-        "origins": [
-            "http://localhost:3000",
-            "https://your-netlify-app.netlify.app"  # Replace with your Netlify domain
-        ],
+        "origins": "*",  # For development, you might want to restrict this in production
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
@@ -476,6 +478,10 @@ scanner = NetworkScanner()
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
 
 @app.route('/scan_network', methods=['POST'])
 def scan_network():
